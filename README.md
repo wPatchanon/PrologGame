@@ -1,3 +1,3 @@
 # PrologGame
 Prolog Homework
-Moster Master
+Monster Master
