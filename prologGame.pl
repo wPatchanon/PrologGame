@@ -43,7 +43,22 @@ play():-
 	reconsult('prologGame.pl'),
 	createDeck(40,Deck1),storeDeck(1,Deck1),
 	createDeck(40,Deck2),storeDeck(2,Deck2),
-	nl,how(),nl,writeln(">>>>>>>>>>>>> Start by player 1 <<<<<<<<<<<<<<").
+	draw4(1),draw4(2),
+	nl,run().
+
+run():- isEnd().
+run():-
+	turn(T), write(">>>>>> Player "),writeln(T),nl,
+	drawCard(T),writeln(">>> A card was drawn."),
+	writeln("Card on hand:"),listCardOnHand(T),
+	nl,writeln("Enter number of card to summon"),read(N),
+	writeln("Enter mode to summon (0=Def,1=Att)"),read(M),
+	summon(T,N,M),
+	writeln("Card on hand:"),listCardOnTable(T),
+	writeln("Enter number of your card to attack or '0' to skip"),read(N1),
+	writeln("Enter number of enemy card to attack or '0' if it has no card"),read(N2),
+	E is mod(T,2)+1,attack(T,E,N1,N2),
+	turnChange(),run().
 	
 :- dynamic playerLife/2.
 :- dynamic remainCard/2.
@@ -68,6 +83,10 @@ onTable(1,[]).
 onTable(2,[]).
 
 updatePlayer(Player,Point):- retract(playerLife(Player,P)),New_P is P+Point,asserta(playerLife(Player,New_P)).
+
+draw4(Player):- draw4Aux(Player,0,4).
+draw4Aux(_,N,N).
+draw4Aux(Player,Acc,N):- New is Acc + 1,drawCard(Player),draw4Aux(Player,New,N).
 
 drawCard(Player):- turn(I),Player \= I,writeln("Not your turn. Wait for turnChange()."),!.
 drawCard(Player):- remainCard(Player,R),R==0,writeln("No more cards in deck!!!"),!.
@@ -177,5 +196,3 @@ turnChange():-
 	asserta(turn(K)).
 
 isEnd():- playerLife(Player,P),P =< 0,PT is mod(Player,2)+1,write("Player "),write(PT),writeln(" Win!!!!!!"),!.
-isEnd().
-
